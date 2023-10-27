@@ -1,20 +1,21 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import userRoute from './routes/user.route.js';
 dotenv.config();
 
 const PORT = 3030;
 
-mongoose
-  .connect(process.env.MONGO_URL)
-  .then(() => {
-    console.log('connecting to the MongoDB');
-  })
-  .catch((error) => {
-    console.log(error);
-  });
+main().catch((err) => console.log(err));
+
+async function main() {
+  await mongoose.connect(process.env.MONGO_URL);
+  // use `await mongoose.connect('mongodb://user:password@127.0.0.1:27017/test');` if your database has auth enabled
+}
 
 const app = express();
+
+app.use('/api/user', userRoute);
 
 app.listen(PORT, () => {
   console.log(`Server is listening on port: (${PORT})..`);
