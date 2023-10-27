@@ -2,6 +2,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import userRoute from './routes/user.route.js';
+import authRoute from './routes/auth.route.js';
 dotenv.config();
 
 const PORT = 3030;
@@ -15,7 +16,10 @@ async function main() {
 
 const app = express();
 
+app.use(express.json());
+
 app.use('/api/user', userRoute);
+app.use('/api/auth', authRoute);
 
 app.listen(PORT, () => {
   console.log(`Server is listening on port: (${PORT})..`);
