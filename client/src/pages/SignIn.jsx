@@ -1,12 +1,20 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  signInStart,
+  signInSuccess,
+  signInFailure,
+} from '../redux/user/userSlice';
 
 const SignIn = () => {
   const [formData, setFormData] = useState({});
-  const [error, setError] = useState(false);
-  const [loading, setLoading] = useState(false);
+
+  const { error, loading } = useSelector((state) => state.user);
 
   const navigate = useNavigate();
+
+  const dispatch = useDispatch();
 
   const handleChange = (event) => {
     setFormData((previousState) => {
@@ -16,22 +24,24 @@ const SignIn = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setLoading(true);
-    setError(false);
-    const response = await fetch('/api/auth//signin', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(formData),
-    });
-    const data = await response.json();
-    if (data.success === false) {
-      setError(true);
-      setLoading(false);
-    } else {
-      setLoading(false);
+    try {
+      dispatch(signInStart());
+      const response = await fetch('/api/auth//signin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+      const data = await response.json();
+      if (data.success === false) {
+        dispatch(signInFailure(data));
+        return;
+      }
+      dispatch(signInSuccess(data));
       navigate('/');
+    } catch (error) {
+      dispatch(signInFailure(error));
     }
   };
 
@@ -45,6 +55,7 @@ const SignIn = () => {
           id='email'
           className='bg-slate-100 p-3 rounded-lg'
           onChange={handleChange}
+          required
         />
         <input
           type='password'
@@ -52,6 +63,7 @@ const SignIn = () => {
           id='password'
           className='bg-slate-100 p-3 rounded-lg'
           onChange={handleChange}
+          required
         />
         <button
           disabled={loading}
@@ -67,7 +79,9 @@ const SignIn = () => {
         </Link>
       </div>
       <div>
-        <p className='text-red-700 mt-5'>{error && 'Something went wrong'}</p>
+        <p className='text-red-700 mt-5'>
+          {error ? error.message || 'Something went wrong' : ''}
+        </p>
       </div>
     </div>
   );
