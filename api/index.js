@@ -2,11 +2,14 @@ import express from 'express';
 import mongoose from 'mongoose';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
+import path from 'path';
 import userRoute from './routes/user.route.js';
 import authRoute from './routes/auth.route.js';
 dotenv.config();
 
 const PORT = 3030;
+
+const __dirname = path.resolve();
 
 main().catch((err) => console.log(err));
 
@@ -16,6 +19,11 @@ async function main() {
 }
 
 const app = express();
+
+app.use(express.static(path.join(__dirname, 'client/dist')));
+app.get('*', (req, res, next) => {
+  res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'));
+});
 
 app.use(express.json());
 app.use(cookieParser());
